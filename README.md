@@ -19,7 +19,7 @@ After its deprecation in v1.20, the dockershim component has been removed from t
 Due to the size limit of the warehouse, some packages need to be downloaded to the corresponding directory by themselves. The download link is as follows:
 ```bash
 # kubernetes 
-cd bin/kubernetes
+mkdir bin/kubernetes && cd bin/kubernetes
 wget https://dl.k8s.io/v1.24.10/bin/linux/amd64/kube-apiserver 
 wget https://dl.k8s.io/v1.24.10/bin/linux/amd64/kube-controller-manager
 wget https://dl.k8s.io/v1.24.10/bin/linux/amd64/kube-proxy
@@ -40,6 +40,7 @@ cd etcd/
 ./build.sh
 
 # last!!
+mkdir kubernetes-deployment/bin/etcd
 cp bin/* kubernetes-deployment/bin/etcd
 ```
 ### configuration
