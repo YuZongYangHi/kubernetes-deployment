@@ -15,6 +15,33 @@ After its deprecation in v1.20, the dockershim component has been removed from t
 * calico v3.25
 * containerd 
 
+### *Preparation
+Due to the size limit of the warehouse, some packages need to be downloaded to the corresponding directory by themselves. The download link is as follows:
+```bash
+# kubernetes 
+cd bin/kubernetes
+wget https://dl.k8s.io/v1.24.10/bin/linux/amd64/kube-apiserver 
+wget https://dl.k8s.io/v1.24.10/bin/linux/amd64/kube-controller-manager
+wget https://dl.k8s.io/v1.24.10/bin/linux/amd64/kube-proxy
+wget https://dl.k8s.io/v1.24.10/bin/linux/amd64/kube-scheduler 
+wget https://dl.k8s.io/v1.24.10/bin/linux/amd64/kubectl
+wget https://dl.k8s.io/v1.24.10/bin/linux/amd64/kubelet
+
+# etcd
+cd /tmp
+wget https://go.dev/dl/go1.16.15.linux-amd64.tar.gz
+tar -xf go1.16.15.linux-amd64.tar.gz
+ln -s /data/go/bin/go /usr/local/bin/go
+ln -s /data/go/bin/gofmt /usr/local/bin/gofmt
+
+# etcd
+git clone -b v3.5.0 https://github.com/etcd-io/etcd.git
+cd etcd/
+./build.sh
+
+# last!!
+cp bin/* kubernetes-deployment/bin/etcd
+```
 ### configuration
 ```bash
 # global variable
@@ -22,7 +49,7 @@ group_vars/global.yml
 ```
 ### quick start
 ```bash
-cd kubernetes-deployment
+cd kubernetes-deployment 
 
 # set env 
 export ANSIBLE_ROOT=$PWD
@@ -33,5 +60,5 @@ ansible-playbook -i hosts/xxx setup.yml --sy
 # deploy
 ansible-playbook -i hosts/xxx setup.yml
 ```
-### Warning
+#### Warning
 Currently available for testing and pre-release environments, please modify the configuration and deployment as needed in the production environment
