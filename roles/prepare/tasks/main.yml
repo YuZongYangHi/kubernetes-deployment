@@ -1,0 +1,7 @@
+- name: verify kernel version before installing kubernetes
+  shell: "uname -r | awk -F '.' '{ print $1 }'"
+  register: kernel_version 
+
+- debug:
+    msg: "current kernel version: {{ kernel_version.stdout }}" 
+  failed_when: "kernel_version.stdout | int < 3"  

@@ -1,0 +1,59 @@
+- name: create kubernetes worker directory
+  file:
+    name: "{{ base_dir }}/{{ item.base }}/{{ item.name }}"
+    state: directory
+    recurse: yes
+  with_items:
+    - { base: 'kube-apiserver', name: 'conf'}
+    - { base: 'kube-apiserver', name: 'logs'}
+    - { base: 'kube-scheduler', name: 'conf'}
+    - { base: 'kube-scheduler', name: 'logs'}
+    - { base: 'kube-controller-manager', name: 'conf'}
+    - { base: 'kube-controller-manager', name: 'logs'}
+
+- name: copy kubernetes binary file
+  copy:
+    src: "bin/kubernetes/{{ item }}"
+    dest: "{{ bin_dir }}/{{ item }}"
+    mode: 0755
+  with_items:
+    - kube-apiserver
+    - kube-controller-manager
+    - kubectl
+    - kube-scheduler
+
+- name: copy kubernetes ssl
+  copy:
+    src: "files/ssl/{{ item }}"
+    dest: "{{ ca_dir }}/{{ item }}"
+  with_items:
+    - ca.pem
+    - ca-key.pem
+    - admin-key.pem
+    - admin.pem
+    - aggregator-proxy-key.pem
+    - aggregator-proxy.pem
+    - kube-apiserver.token.csv
+    - kube-controller-manager-key.pem
+    - kube-controller-manager.pem
+    - kubernetes-key.pem
+    - kubernetes.pem
+    - kube-scheduler-key.pem
+    - kube-scheduler.pem
+
+- name: copy kube-apiserver config file
+  template:
+    src: kube-apiserver.conf.j2
+    dest: "{{ base_dir }}/kube-apiserver/conf/kube-apiserver.conf"
+
+- name: copy kube-apiserver systemd file
+  template:
+    src: kube-apiserver.service.j2
+    dest: /usr/lib/systemd/system/kube-apiserver.service
+
+- name: start kube-apiserver
+  systemd:
+    name: kube-apiserver
+    state: restarted
+    daemon_reload: yes
+    enabled: yes

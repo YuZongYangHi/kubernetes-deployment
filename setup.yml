@@ -1,0 +1,53 @@
+- hosts: 
+    - kube-matser 
+    - kube-node 
+  vars_files: group_vars/global.yml
+  roles:
+    - prepare 
+    - sys
+
+- hosts: 127.0.0.1
+  name: local generate certificate
+  become: false
+  connection: local
+  vars_files: group_vars/global.yml
+ roles:
+    - certs
+- hosts:
+    - etcd
+  vars_files: group_vars/global.yml
+  roles:
+    - etcd 
+
+- hosts: 
+    - kube-master 
+    - kube-node 
+  vars_files: group_vars/global.yml
+  roles:
+   - kube-nginx 
+
+- hosts: 
+    - kube-master 
+  vars_files: group_vars/global.yml
+  roles:
+    - kube-apiserver
+    - kubectl
+    - kube-controller-manager
+    - kube-scheduler
+
+- hosts:
+    - kube-master 
+    - kube-node 
+  vars_files: group_vars/global.yml
+  roles:
+    - containerd
+    - kubelet 
+    - kube-proxy 
+
+- hosts: 127.0.0.1
+  become: false
+  connection: local
+  vars_files: group_vars/global.yml
+  roles:
+    - cni 
+    - coredns 

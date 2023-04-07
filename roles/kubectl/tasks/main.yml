@@ -1,0 +1,54 @@
+- name: create kube worker directory
+  file:
+    name: "/root/.kube"
+    state: directory
+
+- name: copy kubectl binary file
+  copy:
+    src: "bin/kubernetes/kubectl"
+    dest: "{{ bin_dir }}/kubectl"
+    mode: 0755
+
+- name: set kubectl cluster params
+  shell: "{{ bin_dir }}/kubectl config set-cluster kubernetes \
+          --certificate-authority={{ ca_dir }}/ca.pem \
+          --embed-certs=true \
+          --server=https://127.0.0.1:8443 \
+          --kubeconfig=/root/.kube/config"
+
+- name: set kubectl client auth params
+  shell: "{{ bin_dir }}/kubectl config set-credentials admin \
+         --client-certificate={{ ca_dir }}/admin.pem \
+         --client-key={{ ca_dir}}/admin-key.pem \
+         --embed-certs=true \
+         --kubeconfig=/root/.kube/config"
+
+- name: set context params
+  shell: "{{ bin_dir }}/kubectl config set-context kubernetes \
+         --cluster=kubernetes \
+         --user=admin \
+         --kubeconfig=/root/.kube/config"
+
+- name: select default context
+  shell: "{{ bin_dir }}/kubectl config use-context kubernetes \
+         --kubeconfig=/root/.kube/config"
+
+- name: create grant kube-apiserver
+  shell: "{{ bin_dir }}/kubectl create clusterrolebinding kube-apiserver:kubelet-apis \
+         --clusterrole=system:kubelet-api-admin \
+         --user kubernetes"
+  ignore_errors: true
+
+- name: install kubectl command tab
+  yum:
+    name: bash-completion
+    state: latest
+
+- name: copy kubectl auto table scripts
+  template:
+    src: kubectlrc.sh.j2
+    dest: /tmp/kubectlrc.sh
+    mode: 0755
+
+- name: run kubectl auto table scripts 
+  shell: "/bin/bash /tmp/kubectlrc.sh"

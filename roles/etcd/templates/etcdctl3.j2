@@ -1,0 +1,7 @@
+#!/bin/bash
+
+ETCDCTL_API=3 /usr/local/bin/etcdctl \
+--endpoints={{ ETCD_ENDPOINTS }} \
+--cacert={{ ca_dir }}/ca.pem \
+--cert={{ ca_dir }}/etcd.pem \
+--key={{ ca_dir }}/etcd-key.pem $1 $2 $3 $4 $5

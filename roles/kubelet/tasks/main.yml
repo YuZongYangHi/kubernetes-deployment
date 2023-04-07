@@ -1,0 +1,83 @@
+- name: copy kubelet binary file 
+  copy:
+    src: bin/kubernetes/kubelet 
+    dest: "{{ bin_dir }}/kubelet"
+    mode: 0755
+- name: create kubelet work directory 
+  file:
+    name: "{{ base_dir }}/kubelet/{{ item }}"
+    state: directory
+    recurse: yes
+  with_items:
+    - conf
+    - logs 
+
+- name: get kube-apiserver token 
+  shell: "awk -F ',' '{print $1}' {{ ca_dir }}/kube-apiserver.token.csv"
+  register: bootstrap_token
+  delegate_to: "{{ groups['kube-master'][0] }}"
+
+- name: print token
+  delegate_to: "{{ groups['kube-master'][0] }}"
+  debug:
+    msg: "{{ bootstrap_token.stdout_lines }}"
+
+- name: set-cluster kubelet 
+  delegate_to: "{{ groups['kube-master'][0] }}"
+  shell: "{{ bin_dir }}/kubectl config set-cluster kubernetes \
+         --certificate-authority={{ ca_dir }}/ca.pem \
+         --embed-certs=true \
+         --server=https://127.0.0.1:8443 \
+         --kubeconfig={{ base_dir }}/kubelet/conf/kubelet-bootstrap.kubeconfig"
+
+- name: set-credentials kubelet 
+  delegate_to: "{{ groups['kube-master'][0] }}"
+  shell: "{{ bin_dir }}/kubectl config set-credentials kubelet-bootstrap \
+         --token={{ bootstrap_token.stdout_lines[0] }} \
+         --kubeconfig={{ base_dir }}/kubelet/conf/kubelet-bootstrap.kubeconfig"
+
+- name: set-context kubelet 
+  delegate_to: "{{ groups['kube-master'][0] }}"
+  shell: "{{ bin_dir }}/kubectl  config set-context default --cluster=kubernetes \
+         --user=kubelet-bootstrap \
+         --kubeconfig={{ base_dir }}/kubelet/conf/kubelet-bootstrap.kubeconfig"
+
+- name: use-context kubelet 
+  delegate_to: "{{ groups['kube-master'][0] }}"
+  shell: "{{ bin_dir }}/kubectl config use-context default \
+         --kubeconfig={{ base_dir }}/kubelet/conf/kubelet-bootstrap.kubeconfig"
+
+- name: create kubelet clusterrolebinding
+  delegate_to: "{{ groups['kube-master'][0] }}"
+  shell: "{{ bin_dir }}/kubectl create clusterrolebinding kubelet-bootstrap \
+         --clusterrole=system:node-bootstrapper \
+         --user=kubelet-bootstrap \
+         --kubeconfig=/root/.kube/config"
+  ignore_errors: true
+
+- name: copy kubelet kubeconfig 
+  copy:
+    src: "{{ base_dir }}/kubelet/conf/kubelet-bootstrap.kubeconfig"
+    dest: "{{ base_dir }}/kubelet/conf/kubelet-bootstrap.kubeconfig"
+
+- name: copy kubelet config
+  template:
+    src: kubelet.json.j2
+    dest: "{{ base_dir }}/kubelet/conf/kubelet.json"
+
+- name: copy kubelet systemd 
+  template:
+    src: kubelet.service.j2
+    dest: /usr/lib/systemd/system/kubelet.service
+
+- name: start kubelet 
+  systemd:
+    name: kubelet 
+    state: restarted
+    daemon_reload: yes
+    enabled: yes
+
+- name: issue a certificate
+  delegate_to: "{{ groups['kube-master'][0] }}"
+  shell: "{{ bin_dir }}/kubectl get csr | grep Pending | awk '{print $1}' | xargs {{ bin_dir }}/kubectl certificate approve"
+  ignore_errors: true

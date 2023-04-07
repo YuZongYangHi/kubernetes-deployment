@@ -1,0 +1,56 @@
+- block:
+    - name: copy kernel file
+      copy:
+        src: "files/kernel/{{ item }}"
+        dest: "/tmp/{{ item }}"
+      with_items:
+        - "kernel-ml-6.2.9-1.el7.elrepo.x86_64.rpm"
+    - name: install kernel 
+      shell: "yum -y install /tmp/kernel-ml-6.2.9-1.el7.elrepo.x86_64.rpm" 
+    - name: set kernel load position
+      shell: "grub2-set-default 0"
+      register: last_result
+    - name: trigger fail
+      fail:
+        msg: "please reboot instance"
+      when: last_result is succeeded
+  when: "auto_install_kernel == 'yes'"
+
+- name: set time zone
+  shell: "timedatectl set-timezone Asia/Shanghai && timedatectl set-local-rtc 0 && timedatectl set-ntp true"
+
+- name: stop selinux 
+  shell: "setenforce 0 && sed -i 's/^SELINUX=.*/SELINUX=disable/' /etc/selinux/config"
+
+- name: install ipvs 
+  yum:
+    name: 
+      - ipvsadm
+      - ipset
+      - sysstat
+      - conntrack
+      - libseccomp
+    state: present 
+
+- name: copy contriner modules file 
+  copy:
+    src: containerd.conf
+    dest: /etc/modules-load.d/
+
+- name: copy cri sys file 
+  copy:
+    src: 99-kubernetes-cri.conf
+    dest: /etc/sysctl.d/
+
+- name: copy modprobe shell script
+  copy:
+    src: ipvs.modules
+    dest: /etc/sysconfig/modules/
+    mode: 0755
+
+- name: load sysctl 
+  shell: "sysctl -p /etc/sysctl.d/99-kubernetes-cri.conf"
+
+- name: run shell 
+  shell: "bash /etc/sysconfig/modules/ipvs.modules && lsmod | grep -e ip_vs -e nf_conntrack_ipv4" 
+  

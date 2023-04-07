@@ -1,0 +1,6 @@
+#!/bin/bash 
+source /usr/share/bash-completion/bash_completion
+source <({{ bin_dir }}kubectl completion bash)
+{{ bin_dir }}/kubectl completion bash > ~/.kube/completion.bash.inc
+source '/root/.kube/completion.bash.inc'  
+source $HOME/.bash_profile

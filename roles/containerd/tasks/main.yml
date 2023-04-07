@@ -1,0 +1,26 @@
+- name: install containerd 
+  yum: 
+    name: containerd
+    state: latest
+
+- name: generate containerd default config file 
+  shell: "containerd config default > /etc/containerd/config.toml"
+
+- name: start containerd
+  systemd:
+    name: containerd
+    state: restarted
+    daemon_reload: yes
+    enabled: yes 
+
+- name: copy crictl config 
+  copy:
+    src: crictl.yaml
+    dest: /etc/crictl.yaml
+
+- name: copy binary file 
+  copy:
+    src: bin/cri/crictl
+    dest: /usr/local/bin/crictl 
+    mode: 0755
+

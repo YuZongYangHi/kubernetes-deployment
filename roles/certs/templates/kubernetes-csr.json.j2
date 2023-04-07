@@ -1,0 +1,28 @@
+{
+  "CN": "kubernetes",
+  "hosts": [
+    "127.0.0.1",
+{% for host in groups['kube-master'] %}
+    "{{ hostvars[host].INTRANET_IP }}",
+{% endfor %}
+    "{{ CLUSTER_KUBERNETES_SVC_IP }}",
+    "kubernetes",
+    "kubernetes.default",
+    "kubernetes.default.svc",
+    "kubernetes.default.svc.cluster",
+    "kubernetes.default.svc.cluster.local"
+  ],
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "CN",
+      "ST": "Beijing",
+      "L": "Beijing",
+      "O": "{{ cert_o }}",
+      "OU": "{{ cert_ou }}"
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+- name: create work direcoty
+  file: 
+    name: "{{ item }}"
+    state: directory
+  with_items:
+    - "{{ base_dir }}"
+    - "{{ bin_dir }}"
+    - "{{ ca_dir }}"
+    - "{{ etcd_dir }}"
+
+- name: copy etcd binary file 
+  copy: 
+    src: "bin/etcd/{{ item }}"
+    dest: "/usr/local/bin/{{ item }}"
+    mode: 0755
+  with_items:
+    - etcd 
+    - etcdctl
+
+- name: copy etcdctl scripts by v3
+  template: src=etcdctl3.j2 dest=/usr/local/bin/etcdctl3 mode=0755
+
+- name: copy etcd ssl 
+  copy: 
+    src: "files/ssl/{{ item }}" 
+    dest: "{{ ca_dir }}/{{ item }}"
+  with_items:
+    - ca.pem
+    - etcd.pem
+    - etcd-key.pem
+
+- name: copy etcd systemd file 
+  template: src=etcd.service.j2 dest=/usr/lib/systemd/system/etcd.service
+
+- name: set enable etcd 
+  shell: systemctl enable etcd
+  ignore_errors: true
+
+- name: start etcd service 
+  shell: systemctl daemon-reload && systemctl restart etcd
+  ignore_errors: true
+
+- name: wait etcd is running 
+  shell: "systemctl status etcd.service|grep Active"
+  register: etcd_status
+  until: '"running" in etcd_status.stdout'
+  retries: 8
+  delay: 8
+
+
+

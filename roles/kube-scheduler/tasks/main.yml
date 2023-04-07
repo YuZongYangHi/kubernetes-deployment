@@ -1,0 +1,40 @@
+- name: create kube-scheduler kube-config
+  shell: "{{ bin_dir }}/kubectl config set-cluster kubernetes \
+         --certificate-authority={{ ca_dir }}/ca.pem \
+         --embed-certs=true \
+         --server=https://127.0.0.1:8443 \
+         --kubeconfig={{ base_dir }}/kube-scheduler/conf/kube-scheduler.kubeconfig"
+
+- name: create kube-scheduler kube-config
+  shell: "{{ bin_dir }}/kubectl config set-credentials system:kube-scheduler \
+         --client-certificate={{ ca_dir }}/kube-scheduler.pem \
+         --client-key={{ ca_dir }}/kube-scheduler-key.pem \
+         --embed-certs=true \
+         --kubeconfig={{ base_dir }}/kube-scheduler/conf/kube-scheduler.kubeconfig"
+
+- name: create kube-scheduler kube-config
+  shell: "{{ bin_dir }}/kubectl config set-context system:kube-scheduler \
+         --cluster=kubernetes \
+         --user=system:kube-scheduler \
+         --kubeconfig={{ base_dir }}/kube-scheduler/conf/kube-scheduler.kubeconfig"
+
+- name: create kube-scheduler kube-config
+  shell: "{{ bin_dir }}/kubectl config use-context system:kube-scheduler \
+         --kubeconfig={{ base_dir }}/kube-scheduler/conf/kube-scheduler.kubeconfig"
+
+- name: copy kube-scheduler config file
+  template:
+    src: kube-scheduler.conf.j2
+    dest: "{{ base_dir }}/kube-scheduler/conf/kube-scheduler.conf"
+
+- name: copy kube-scheduler systemd file 
+  template: 
+    src: kube-scheduler.service.j2
+    dest: /usr/lib/systemd/system/kube-scheduler.service
+
+- name: start kube-scheduler
+  systemd:
+    name: kube-scheduler
+    state: restarted
+    daemon_reload: yes
+    enabled: yes

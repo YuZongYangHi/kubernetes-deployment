@@ -1,0 +1,34 @@
+KUBE_APISERVER_OPTS="--enable-admission-plugins=NamespaceLifecycle,NodeRestriction,LimitRanger,ServiceAccount,DefaultStorageClass,ResourceQuota \
+  --anonymous-auth=false \
+  --bind-address={{ INTRANET_IP }} \
+  --secure-port=6443 \
+  --advertise-address={{ INTRANET_IP }} \
+  --authorization-mode=Node,RBAC \
+  --runtime-config=api/all=true \
+  --enable-bootstrap-token-auth \
+  --service-cluster-ip-range={{ SERVICE_CIDR }} \
+  --token-auth-file=/data/kubernetes/ssl/kube-apiserver.token.csv \
+  --service-node-port-range=30000-50000 \
+  --tls-cert-file={{ ca_dir }}/kubernetes.pem  \
+  --tls-private-key-file={{ ca_dir }}/kubernetes-key.pem \
+  --client-ca-file={{ ca_dir }}/ca.pem \
+  --kubelet-client-certificate={{ ca_dir }}/kubernetes.pem \
+  --kubelet-client-key={{ ca_dir }}/kubernetes-key.pem \
+  --service-account-key-file={{ ca_dir }}/ca-key.pem \
+  --service-account-signing-key-file={{ ca_dir }}/ca-key.pem  \
+  --service-account-issuer=api \
+  --etcd-cafile={{ ca_dir }}/ca.pem \
+  --etcd-certfile={{ ca_dir }}/etcd.pem \
+  --etcd-keyfile={{ ca_dir }}/etcd-key.pem \
+  --etcd-servers={{ ETCD_ENDPOINTS }} \
+  --allow-privileged=true \
+  --apiserver-count=3 \
+  --audit-log-maxage=30 \
+  --audit-log-maxbackup=3 \
+  --audit-log-maxsize=100 \
+  --audit-log-path={{ base_dir }}/kube-apiserver/logs/kube-apiserver-audit.log \
+  --event-ttl=1h \
+  --alsologtostderr=true \
+  --logtostderr=false \
+  --log-dir={{ base_dir }}/kube-apiserver/logs/ \
+  --v=4"

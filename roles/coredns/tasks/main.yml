@@ -1,0 +1,7 @@
+- name: copy coredis yaml
+  template:
+    src: coredns.yaml.j2
+    dest: files/coredns/coredns.yaml
+
+- name: apply coredns 
+  shell: "{{ bin_dir }}/kubectl apply -f files/coredns/coredns.yaml"

@@ -1,0 +1,7 @@
+TMP_NODES: "{% for h in groups['etcd'] %}{{ hostvars[h]['NODE_NAME'] }}=https://{{ hostvars[h]['INTRANET_IP'] }}:2380,{% endfor %}"
+ETCD_NODES: "{{ TMP_NODES.rstrip(',') }}"
+
+TMP_ENDPOINTS: "{% for h in groups['etcd'] %}https://{{ hostvars[h]['INTRANET_IP'] }}:2379,{% endfor %}"
+ETCD_ENDPOINTS: "{{ TMP_ENDPOINTS.rstrip(',') }}"
+
+CLUSTER_STATE: "new"

@@ -1,0 +1,85 @@
+- name: Verify that the ca certificate has been generated
+  stat: path="files/ssl/ca.pem"
+  register: p
+
+- block:
+    - name: generate kube-apiserver token
+      shell: "echo $(head -c 16 /dev/urandom | od -An -t x | tr -d ' '),kubelet-bootstrap,10001,'system:kubelet-bootstrap' > files/ssl/kube-apiserver.token.csv"
+
+    - name: copy ca config
+      template: src=ca-config.json.j2 dest=files/ssl/ca-config.json
+
+    - name: copy ca signing request
+      template: src=ca-csr.json.j2 dest=files/ssl/ca-csr.json
+
+    - name: generate ca certificate and private key
+      shell: "cd files/ssl/ && cfssl gencert -initca ca-csr.json | cfssljson -bare ca"
+   
+    - name: copy admin signing request
+      template: src=admin-csr.json.j2 dest=files/ssl/admin-csr.json
+
+    - name: generated admin certificate and private key 
+      shell: "cd files/ssl && cfssl gencert \ 
+              -ca=ca.pem \
+              -ca-key=ca-key.pem \
+              -config=ca-config.json \
+              -profile=kubernetes admin-csr.json | cfssljson -bare admin"
+    - name: copy etcd signing request config 
+      template: src=etcd-csr.json.j2 dest=files/ssl/etcd-csr.json
+
+    - name: generated etcd certificate and private key 
+      shell: "cd files/ssl && cfssl gencert \
+             -ca=ca.pem \
+             -ca-key=ca-key.pem  \            
+             -config=ca-config.json \
+             -profile=kubernetes etcd-csr.json | cfssljson -bare etcd" 
+    - name: copy kubernetes signing request config
+      template: src=kubernetes-csr.json.j2 dest=files/ssl/kubernetes-csr.json
+
+    - name: generated kubernetes certificate and private key
+      shell: "cd files/ssl && cfssl gencert \
+             -ca=ca.pem \
+             -ca-key=ca-key.pem \
+             -config=ca-config.json \
+             -profile=kubernetes kubernetes-csr.json | cfssljson -bare kubernetes"
+
+    - name: copy aggregator-proxy signing request config
+      template: src=aggregator-proxy-csr.json.j2 dest=files/ssl/aggregator-proxy-csr.json
+
+    - name: generated kubernetes certificate and private key
+      shell: "cd files/ssl && cfssl gencert \
+             -ca=ca.pem \
+             -ca-key=ca-key.pem \
+             -config=ca-config.json \
+             -profile=kubernetes aggregator-proxy-csr.json | cfssljson -bare aggregator-proxy"
+    
+    - name: copy kube-controller-manager signing request config
+      template: src=kube-controller-manager-csr.json.j2 dest=files/ssl/kube-controller-manager-csr.json
+
+    - name: generated kube-controller-manager certificate and private key
+      shell: "cd files/ssl && cfssl gencert \
+              -ca=ca.pem \
+              -ca-key=ca-key.pem \
+              -config=ca-config.json \
+              -profile=kubernetes kube-controller-manager-csr.json | cfssljson -bare kube-controller-manager"
+  
+    - name: copy kube-scheduler signing request config
+      template: src=kube-scheduler-csr.json.j2 dest=files/ssl/kube-scheduler-csr.json
+
+    - name: generated kube-scheduler certificate and private key 
+      shell: "cd files/ssl && cfssl gencert \
+             -ca=ca.pem \
+             -ca-key=ca-key.pem \
+             -config=ca-config.json \
+             -profile=kubernetes kube-scheduler-csr.json | cfssljson -bare kube-scheduler"
+
+    - name: copy kube-proxy signing request config
+      template: src=kube-proxy-csr.json.j2 dest=files/ssl/kube-proxy-csr.json
+
+    - name: generated kube-proxy certificate and private key 
+      shell: "cd files/ssl && cfssl gencert \
+            -ca=ca.pem \
+            -ca-key=ca-key.pem \
+            -config=ca-config.json \
+            -profile=kubernetes kube-proxy-csr.json | cfssljson -bare kube-proxy"
+  when: p.stat.isreg is not defined

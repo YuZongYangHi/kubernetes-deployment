@@ -1,0 +1,24 @@
+[Unit]
+Description=Kubernetes Kubelet
+Documentation=https://github.com/kubernetes/kubernetes
+
+[Service]
+WorkingDirectory={{ base_dir }}/kubelet
+ExecStart={{ bin_dir }}/kubelet \
+  --bootstrap-kubeconfig={{ base_dir }}/kubelet/conf/kubelet-bootstrap.kubeconfig \
+  --cert-dir={{ ca_dir }} \
+  --kubeconfig={{ base_dir }}/kubelet/conf/kubelet.kubeconfig \
+  --config={{ base_dir }}/kubelet/conf/kubelet.json \
+  --container-runtime-endpoint=unix:///var/run/containerd/containerd.sock \
+  --rotate-certificates \
+  --container-runtime=remote  \
+  --hostname-override={{ INTRANET_IP }} \
+  --alsologtostderr=true \
+  --logtostderr=false \
+  --log-dir={{ base_dir }}/kubelet/logs \
+  --v=2
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

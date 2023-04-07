@@ -1,0 +1,10 @@
+- name: grant apiserver access kubelet 
+  shell: "{{ bin_dir }}/kubectl apply -f roles/cni/files/apiserver-to-kubelet-rbac.yaml"
+
+- name: copy calico yaml file 
+  template:
+    src: calico.yaml.j2
+    dest: files/calico/calico.yaml
+
+- name: apply calico file 
+  shell: "{{ bin_dir }}/kubectl apply -f files/calico/calico.yaml"

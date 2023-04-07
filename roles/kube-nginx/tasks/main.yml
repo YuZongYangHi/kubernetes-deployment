@@ -1,0 +1,35 @@
+- name: create kube-nginx directory 
+  file:
+    name: "{{ base_dir }}/kube-nginx/{{ item }}"
+    state: directory
+    recurse: yes
+  with_items:
+    - conf
+    - logs 
+    - sbin  
+
+- name: copy kube-nginx binary file 
+  copy:
+    src: bin/nginx/nginx
+    dest: "{{ base_dir }}/kube-nginx/sbin/nginx"
+    mode: 0755 
+
+- name: copy kube-nginx config file 
+  template:
+    src: kube-nginx.conf.j2
+    dest: "{{ base_dir }}/kube-nginx/conf/kube-nginx.conf"
+
+- name: copy kube-nginx systemd config file 
+  template:
+    src: kube-nginx.service.js
+    dest: "/usr/lib/systemd/system/kube-nginx.service"
+
+- name: check kube-nginx format 
+  shell: "systemd-analyze verify /usr/lib/systemd/system/kube-nginx.service"
+
+- name: start kube-nginx
+  systemd:
+    name: kube-nginx
+    state: restarted
+    daemon_reload: yes
+    enabled: yes

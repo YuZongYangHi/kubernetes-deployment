@@ -1,0 +1,40 @@
+- name: create kube-controller-manager kube-config
+  shell: "{{ bin_dir }}/kubectl config set-cluster kubernetes \
+         --certificate-authority={{ ca_dir }}/ca.pem \
+         --embed-certs=true \
+         --server=https://127.0.0.1:8443 \
+         --kubeconfig={{ base_dir }}/kube-controller-manager/conf/kube-controller-manager.kubeconfig"
+
+- name: set kube-controller-manager kube-config 
+  shell: "{{ bin_dir }}/kubectl config set-credentials system:kube-controller-manager \
+         --client-certificate={{ ca_dir }}/kube-controller-manager.pem \
+         --client-key={{ ca_dir }}/kube-controller-manager-key.pem \
+         --embed-certs=true \
+         --kubeconfig={{ base_dir }}/kube-controller-manager/conf/kube-controller-manager.kubeconfig"
+
+- name: set kube-controller-manager kube-config
+  shell: "{{ bin_dir }}/kubectl config set-context system:kube-controller-manager \
+         --cluster=kubernetes \
+         --user=system:kube-controller-manager \
+         --kubeconfig={{ base_dir }}/kube-controller-manager/conf/kube-controller-manager.kubeconfig"
+
+- name: set kube-controller-manager kube-config
+  shell: "{{ bin_dir }}/kubectl config use-context system:kube-controller-manager \
+         --kubeconfig={{ base_dir }}/kube-controller-manager/conf/kube-controller-manager.kubeconfig"
+
+- name: copy kube-controller-manager config file
+  template:
+    src: kube-controller-manager.conf.j2
+    dest: "{{ base_dir }}/kube-controller-manager/conf/kube-controller-manager.conf"
+
+- name: copy kube-controller-manager systemd file 
+  template:
+    src: kube-controller-manager.service.j2
+    dest: /usr/lib/systemd/system/kube-controller-manager.service
+
+- name: start kube-controller-manager 
+  systemd:
+    name: kube-controller-manager
+    state: restarted
+    daemon_reload: yes
+    enabled: yes

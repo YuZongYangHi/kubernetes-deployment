@@ -1,0 +1,15 @@
+SERVICE_CIDR: "10.96.0.0/16"
+CLUSTER_CIDR: "10.97.0.0/16"
+CLUSTER_KUBERNETES_SVC_IP: "10.96.0.1"
+CLUSTER_DNS_SVC_IP: "10.96.0.2"
+
+base_dir: "/data/kubernetes"
+bin_dir: "{{ base_dir }}/bin"
+ca_dir: "{{ base_dir }}/ssl"
+etcd_dir: "{{ base_dir }}/etcd"
+
+auto_install_kernel: 'no'
+
+cert_o: "Kubernetes"
+cert_ou: "kubernetes"
+cert_ca_expiry: "87600h"

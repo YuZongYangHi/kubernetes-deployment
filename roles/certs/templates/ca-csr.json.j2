@@ -1,0 +1,19 @@
+{
+  "CN": "kubernetes",
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "CN",
+      "ST": "Beijing",
+      "L": "Beijing",
+      "O": "{{ cert_o }}",
+      "OU": "{{ cert_ou }}"
+    }
+  ],
+  "ca": {
+    "expiry": "{{ cert_ca_expiry }}"
+  }
+}

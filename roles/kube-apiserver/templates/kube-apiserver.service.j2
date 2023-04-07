@@ -1,0 +1,16 @@
+[Unit]
+Description=Kubernetes API Server
+Documentation=https://github.com/kubernetes/kubernetes
+After=etcd.service
+Wants=etcd.service
+
+[Service]
+EnvironmentFile=-{{ base_dir }}/kube-apiserver/conf/kube-apiserver.conf
+ExecStart={{ bin_dir }}/kube-apiserver $KUBE_APISERVER_OPTS
+Restart=on-failure
+RestartSec=5
+Type=notify
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target
