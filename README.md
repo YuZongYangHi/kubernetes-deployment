@@ -43,12 +43,12 @@ cd etcd/
 mkdir kubernetes-deployment/bin/etcd
 cp bin/* kubernetes-deployment/bin/etcd
 ```
-### configuration
+### Configuration
 ```bash
 # global variable
 group_vars/global.yml
 ```
-### quick start
+### Quick Start
 ```bash
 cd kubernetes-deployment 
 
