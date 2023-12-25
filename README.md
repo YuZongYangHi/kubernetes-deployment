@@ -27,12 +27,12 @@ wget https://dl.k8s.io/v1.24.10/bin/linux/amd64/kube-scheduler
 wget https://dl.k8s.io/v1.24.10/bin/linux/amd64/kubectl
 wget https://dl.k8s.io/v1.24.10/bin/linux/amd64/kubelet
 
-# etcd
+# golang
 cd /tmp
 wget https://go.dev/dl/go1.16.15.linux-amd64.tar.gz
 tar -xf go1.16.15.linux-amd64.tar.gz
-ln -s /data/go/bin/go /usr/local/bin/go
-ln -s /data/go/bin/gofmt /usr/local/bin/gofmt
+ln -s go/bin/go /usr/local/bin/go
+ln -s go/bin/gofmt /usr/local/bin/gofmt
 
 # etcd
 git clone -b v3.5.0 https://github.com/etcd-io/etcd.git
