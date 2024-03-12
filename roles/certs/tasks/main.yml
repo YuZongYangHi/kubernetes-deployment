@@ -3,6 +3,13 @@
   register: p
 
 - block:
+    - name: copy cfssl
+      copy:
+        src: "bin/cfssl/{{ item }}"
+        dest: "/usr/bin/{{ item }}"
+      with_items:
+        - cfssljson
+        - cfssl
     - name: generate kube-apiserver token
       shell: "echo $(head -c 16 /dev/urandom | od -An -t x | tr -d ' '),kubelet-bootstrap,10001,'system:kubelet-bootstrap' > files/ssl/kube-apiserver.token.csv"
 

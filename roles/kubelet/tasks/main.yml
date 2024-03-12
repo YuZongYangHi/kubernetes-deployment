@@ -1,8 +1,29 @@
+- name: create kubelet ssl dir
+  file:
+    name: "{{ ca_dir }}"
+    state: directory
+    recurse: yes
+
+- name: create kubelet bin dir 
+  file:
+    name: "{{ base_dir }}/bin"
+    state: directory
+    recurse: yes
+
+- name: copy kubernetes ssl
+  copy:
+    src: "files/ssl/{{ item }}"
+    dest: "{{ ca_dir }}/{{ item }}"
+  with_items:
+    - ca.pem
+    - ca-key.pem
+
 - name: copy kubelet binary file 
   copy:
     src: bin/kubernetes/kubelet 
     dest: "{{ bin_dir }}/kubelet"
     mode: 0755
+
 - name: create kubelet work directory 
   file:
     name: "{{ base_dir }}/kubelet/{{ item }}"

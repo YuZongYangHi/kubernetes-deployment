@@ -7,7 +7,7 @@ KUBE_APISERVER_OPTS="--enable-admission-plugins=NamespaceLifecycle,NodeRestricti
   --runtime-config=api/all=true \
   --enable-bootstrap-token-auth \
   --service-cluster-ip-range={{ SERVICE_CIDR }} \
-  --token-auth-file=/data/kubernetes/ssl/kube-apiserver.token.csv \
+  --token-auth-file={{ ca_dir }}/kube-apiserver.token.csv \
   --service-node-port-range=30000-50000 \
   --tls-cert-file={{ ca_dir }}/kubernetes.pem  \
   --tls-private-key-file={{ ca_dir }}/kubernetes-key.pem \
