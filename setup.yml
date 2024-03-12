@@ -11,7 +11,7 @@
   become: false
   connection: local
   vars_files: group_vars/global.yml
- roles:
+  roles:
     - certs
 - hosts:
     - etcd
